@@ -90,4 +90,7 @@ async function crawl() {
 }
 
 await crawl();
-await Deno.writeTextFile("./database.json", JSON.stringify(database));
+await Deno.writeTextFile(
+  "./gmat-database.js",
+  `window.gmatDatabase = ${JSON.stringify(database)}`
+);
