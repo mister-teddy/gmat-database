@@ -1,12 +1,16 @@
+import { CRAWLERS } from "./main.ts";
+
 interface Question {
   question: string;
   explainations: string[];
 }
 
 interface Database {
-  questions: { [id: string]: Question };
+  questions: { [type in keyof typeof CRAWLERS]: { [id: string]: Question } };
 }
 
 export const database: Database = {
-  questions: {},
+  questions: {
+    PS: {},
+  },
 };

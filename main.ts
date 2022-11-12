@@ -5,7 +5,9 @@ import {
 import { database } from "./database.ts";
 import { wait } from "./utils.ts";
 
-const url = `https://gmatclub.com/forum/search.php?selected_search_tags%5B%5D=187&selected_search_tags%5B%5D=216&selected_search_tags%5B%5D=217&t=0&search_tags=exact&submit=Search`;
+export const CRAWLERS = {
+  PS: `https://gmatclub.com/forum/search.php?selected_search_tags%5B%5D=187&selected_search_tags%5B%5D=216&selected_search_tags%5B%5D=217&t=0&search_tags=exact&submit=Search`,
+};
 
 function getIdFromUrl(url: string) {
   if (url.endsWith(".html")) {
@@ -69,22 +71,24 @@ async function crawlQuestion(url: string) {
 }
 
 async function crawl() {
-  const document = await fetchAsDOM(url);
-  const posts = Array.from(document.querySelectorAll(".topic-link")).map(
-    (title) => {
-      const el = title as Element;
-      return {
-        title: el.getAttribute("title"),
-        href: el.getAttribute("href"),
-      };
-    }
-  );
-  for (const post of posts) {
-    const questionUrl = post.href!;
-    const id = getIdFromUrl(questionUrl);
-    if (!database.questions[id]) {
-      database.questions[id] = await crawlQuestion(questionUrl);
-      break;
+  for (const key in CRAWLERS) {
+    const questionType = key as keyof typeof CRAWLERS;
+    const document = await fetchAsDOM(CRAWLERS[questionType]);
+    const posts = Array.from(document.querySelectorAll(".topic-link")).map(
+      (title) => {
+        const el = title as Element;
+        return {
+          title: el.getAttribute("title"),
+          href: el.getAttribute("href"),
+        };
+      }
+    );
+    for (const post of posts) {
+      const questionUrl = post.href!;
+      const id = getIdFromUrl(questionUrl);
+      if (!database.questions[questionType][id]) {
+        database.questions[questionType][id] = await crawlQuestion(questionUrl);
+      }
     }
   }
 }
