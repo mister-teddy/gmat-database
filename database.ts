@@ -1,6 +1,6 @@
 interface Question {
   question: string;
-  answer: string;
+  explainations: string[];
 }
 
 interface Database {

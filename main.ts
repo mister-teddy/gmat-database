@@ -40,7 +40,7 @@ async function crawlQuestion(url: string) {
         if (node.classList.contains("twoRowsBlock")) {
           tobeRemoved = true;
           if (tobeRemoved) {
-            questionElement.removeChild(node);
+            node._remove();
           }
         }
       });
@@ -49,22 +49,22 @@ async function crawlQuestion(url: string) {
           "script, .quotetitle, .quotecontent, .twoRowsBlock, .post_signature"
         )
         .forEach((node) => {
-          questionElement.removeChild(node);
+          node._remove();
         });
       questionElement.getElementsByTagName("b").forEach((node) => {
         if (
           node.innerText.startsWith("The OA will be automatically revealed on")
         ) {
-          questionElement.removeChild(node);
+          node.remove();
         }
       });
       return questionElement.innerHTML.trim();
     }
   );
-  const [question, answer] = contents;
+  const [question, ...explainations] = contents;
   return {
     question,
-    answer,
+    explainations,
   };
 }
 
