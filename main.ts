@@ -81,7 +81,11 @@ async function crawl() {
   for (const key in CRAWLERS) {
     const questionType = key as keyof typeof CRAWLERS;
     console.info(">>> Crawling ", questionType, CRAWLERS[questionType]);
-    const document = await fetchAsDOM(CRAWLERS[questionType]);
+    const document = await fetchAsDOM(
+      database[questionType].length
+        ? `${CRAWLERS[questionType]}&start=${database[questionType].length}`
+        : CRAWLERS[questionType]
+    );
     const posts = Array.from(document.querySelectorAll(".topic-link")).map(
       (title) => {
         const el = title as Element;
@@ -113,4 +117,17 @@ async function crawl() {
   }
 }
 
+const report = Object.keys(database).map((key) => ({
+  key,
+  count: database[key as keyof typeof database].length,
+}));
 await crawl();
+console.log(`# Crawling finished :rocket:
+
+New questions:
+${report
+  .map(
+    ({ key, count }) =>
+      `**${key}**: ${database[key as keyof typeof database].length - count}`
+  )
+  .join("\n")}`);
