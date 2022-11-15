@@ -34,7 +34,7 @@ async function fetchAsDOM(url: string) {
 }
 
 async function crawlQuestion(url: string): Promise<Question> {
-  console.info(">>> Crawling question", url);
+  console.warn(">>> Crawling question", url);
   const document = await fetchAsDOM(url);
   const contents = Array.from(document.querySelectorAll(".item.text")).map(
     (question) => {
@@ -80,7 +80,7 @@ async function crawlQuestion(url: string): Promise<Question> {
 async function crawl() {
   for (const key in CRAWLERS) {
     const questionType = key as keyof typeof CRAWLERS;
-    console.info(">>> Crawling ", questionType, CRAWLERS[questionType]);
+    console.warn(">>> Crawling ", questionType, CRAWLERS[questionType]);
     const document = await fetchAsDOM(
       database[questionType].length
         ? `${CRAWLERS[questionType]}&start=${database[questionType].length}`
@@ -111,7 +111,7 @@ async function crawl() {
           JSON.stringify(database)
         );
       } else {
-        console.info(`>>> Question #${id} already crawln, skipping...`);
+        console.warn(`>>> Question #${id} already crawln, skipping...`);
       }
     }
   }

@@ -4,6 +4,6 @@ export function wait(ms: number) {
 
 export async function throttle() {
   const throttling = Math.random() * 5000 + 5000;
-  console.info(`Throttling for ${throttling / 1000}s`);
+  console.warn(`Throttling for ${throttling / 1000}s`);
   await wait(throttling);
 }

@@ -22,6 +22,6 @@ try {
   const content = Deno.readTextFileSync("./output/index.json");
   Object.assign(database, JSON.parse(content));
 } catch (error) {
-  console.info(">>> Cannot pickup pervious data. Init new database");
+  console.warn(">>> Cannot pickup pervious data. Init new database");
   console.error(error);
 }
