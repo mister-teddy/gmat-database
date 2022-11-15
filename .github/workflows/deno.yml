@@ -48,17 +48,6 @@ jobs:
       - name: Run main
         run: deno run --allow-all ./main.ts
 
-      - name: Move to output
-        run: |
-          mkdir output
-          mv gmat-database.js output/index.js
-
-      - name: Save database artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: gmat-database.js
-          path: output/index.js
-
       # Must run in the same jobs otherwise previous output won't be kept
       - name: Setup Pages
         uses: actions/configure-pages@v2

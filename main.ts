@@ -2,11 +2,15 @@ import {
   DOMParser,
   Element,
 } from "https://deno.land/x/deno_dom@v0.1.35-alpha/deno-dom-wasm.ts";
-import { database } from "./database.ts";
-import { wait } from "./utils.ts";
+import { database, Question } from "./database.ts";
+import { throttle } from "./utils.ts";
 
 export const CRAWLERS = {
+  RC: `https://gmatclub.com/forum/search.php?selected_search_tags%5B%5D=162&selected_search_tags%5B%5D=228&selected_search_tags%5B%5D=229&t=0&search_tags=exact&submit=Search`,
+  SC: `https://gmatclub.com/forum/search.php?selected_search_tags%5B%5D=172&selected_search_tags%5B%5D=231&selected_search_tags%5B%5D=232&t=0&search_tags=exact&submit=Search`,
+  CR: `https://gmatclub.com/forum/search.php?selected_search_tags%5B%5D=168&selected_search_tags%5B%5D=226&selected_search_tags%5B%5D=227&t=0&search_tags=exact&submit=Search`,
   PS: `https://gmatclub.com/forum/search.php?selected_search_tags%5B%5D=187&selected_search_tags%5B%5D=216&selected_search_tags%5B%5D=217&t=0&search_tags=exact&submit=Search`,
+  DS: `https://gmatclub.com/forum/search.php?selected_search_tags%5B%5D=180&selected_search_tags%5B%5D=222&selected_search_tags%5B%5D=223&t=0&search_tags=exact&submit=Search`,
 };
 
 function getIdFromUrl(url: string) {
@@ -29,10 +33,8 @@ async function fetchAsDOM(url: string) {
   return document!;
 }
 
-async function crawlQuestion(url: string) {
-  const throttling = Math.random() * 5000 + 5000;
-  console.info(`Throttling for ${throttling / 1000}s`);
-  await wait(throttling);
+async function crawlQuestion(url: string): Promise<Question> {
+  console.info(">>> Crawling question", url);
   const document = await fetchAsDOM(url);
   const contents = Array.from(document.querySelectorAll(".item.text")).map(
     (question) => {
@@ -60,11 +62,16 @@ async function crawlQuestion(url: string) {
           node.remove();
         }
       });
-      return questionElement.innerHTML.trim();
+      return questionElement.innerHTML
+        .replace(/<!--[\s\S]*?-->/g, "")
+        .replace(/<br>_________________<br>/g, "")
+        .trim()
+        .replace(/^( |<br>)*(.*?)( |<br>)*$/, "$2");
     }
   );
   const [question, ...explainations] = contents;
   return {
+    src: url,
     question,
     explainations,
   };
@@ -73,6 +80,7 @@ async function crawlQuestion(url: string) {
 async function crawl() {
   for (const key in CRAWLERS) {
     const questionType = key as keyof typeof CRAWLERS;
+    console.info(">>> Crawling ", questionType, CRAWLERS[questionType]);
     const document = await fetchAsDOM(CRAWLERS[questionType]);
     const posts = Array.from(document.querySelectorAll(".topic-link")).map(
       (title) => {
@@ -86,15 +94,23 @@ async function crawl() {
     for (const post of posts) {
       const questionUrl = post.href!;
       const id = getIdFromUrl(questionUrl);
-      if (!database.questions[questionType][id]) {
-        database.questions[questionType][id] = await crawlQuestion(questionUrl);
+      if (!database[questionType].includes(id)) {
+        database[questionType].push(id);
+        await throttle();
+        const question = await crawlQuestion(questionUrl);
+        await Deno.writeTextFile(
+          `./output/${id}.json`,
+          JSON.stringify(question)
+        );
+        await Deno.writeTextFile(
+          "./output/index.json",
+          JSON.stringify(database)
+        );
+      } else {
+        console.info(`>>> Question #${id} already crawln, skipping...`);
       }
     }
   }
 }
 
 await crawl();
-await Deno.writeTextFile(
-  "./gmat-database.js",
-  `window.gmatDatabase = ${JSON.stringify(database)}`
-);
