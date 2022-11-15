@@ -69,7 +69,7 @@ async function crawlQuestion(url: string): Promise<Question> {
         .replace(/^( |<br>)*(.*?)( |<br>)*$/, "$2");
     }
   );
-  const [question, ...explainations] = contents;
+  const [question, ...explainations] = contents.slice(0, -1);
   return {
     src: url,
     question,
