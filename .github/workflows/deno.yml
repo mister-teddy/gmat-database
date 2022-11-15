@@ -8,6 +8,8 @@
 
 name: Deno
 
+concurrency: gmat-database
+
 on:
   push:
     branches: ["main"]
@@ -38,23 +40,39 @@ jobs:
         with:
           deno-version: v1.x
 
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+            name: github-pages
+            path: output
+            workflow_conclusion: success
+
+      - name: Extract pervious artifact
+        run: tar --skip-old-files -xf artifact.tar && rm artifact.tar
+        working-directory: output
+
+      - name: View current database
+        run: ls -R
+        working-directory: output
+
       # Uncomment this step to verify the use of 'deno fmt' on each commit.
       # - name: Verify formatting
       #   run: deno fmt --check
 
-      - name: Run linter
-        run: deno lint
+      # - name: Run linter
+      #   run: deno lint
 
-      - name: Run main
-        run: deno run --allow-all ./main.ts
+      # - name: Run main
+      #   run: deno run --allow-all ./main.ts
 
-      # Must run in the same jobs otherwise previous output won't be kept
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: "./output"
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+      # # Must run in the same jobs otherwise previous output won't be kept
+      # - name: Setup Pages
+      #   uses: actions/configure-pages@v2
+      # - name: Upload artifact
+      #   uses: actions/upload-pages-artifact@v1
+      #   with:
+      #     path: "./output"
+      # - name: Deploy to GitHub Pages
+      #   id: deployment
+      #   uses: actions/deploy-pages@v1
