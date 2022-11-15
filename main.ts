@@ -80,12 +80,11 @@ async function crawlQuestion(url: string): Promise<Question> {
 async function crawl() {
   for (const key in CRAWLERS) {
     const questionType = key as keyof typeof CRAWLERS;
-    console.warn(">>> Crawling ", questionType, CRAWLERS[questionType]);
-    const document = await fetchAsDOM(
-      database[questionType].length
-        ? `${CRAWLERS[questionType]}&start=${database[questionType].length}`
-        : CRAWLERS[questionType]
-    );
+    const url = database[questionType].length
+      ? `${CRAWLERS[questionType]}&start=${database[questionType].length}`
+      : CRAWLERS[questionType];
+    console.warn(">>> Crawling ", questionType, url);
+    const document = await fetchAsDOM(url);
     const posts = Array.from(document.querySelectorAll(".topic-link")).map(
       (title) => {
         const el = title as Element;
