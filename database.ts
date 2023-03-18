@@ -33,3 +33,8 @@ try {
   console.warn(">>> Cannot pickup pervious data. Init new database");
   console.error(error);
 }
+
+export const report = Object.keys(database).map((key) => ({
+  key,
+  count: database[key as keyof typeof database].length,
+}));

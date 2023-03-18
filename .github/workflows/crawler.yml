@@ -1,12 +1,7 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# Crawl questions on GMAT Club and publish it to Github Pages as JSONs
+# Fetch https://nguyenhongphat0.github.io/gmat-database/index.json or https://nguyenhongphat0.github.io/gmat-database/<question_id>.json to use it
 
-# This workflow will install Deno then run `deno lint` and `deno test`.
-# For more information see: https://github.com/denoland/setup-deno
-
-name: Deno
+name: Crawler
 
 concurrency: gmat-database
 

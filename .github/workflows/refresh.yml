@@ -1,0 +1,48 @@
+# To keep previous data when running the new 'Crawler' workflow, the previous artifact must be downloaded and incrementally updated.
+# However, artifacts expire after 90 days. Therefore, I set up this cronjob to automatically download and upload the artifact every day.
+
+name: Refresh artifact
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  main:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v3
+
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        continue-on-error: true
+        with:
+          name: github-pages
+          path: output
+          workflow_conclusion: success
+
+      - name: Extract pervious artifact
+        run: tar --skip-old-files -xf artifact.tar && rm artifact.tar
+        continue-on-error: true
+        working-directory: output
+
+      - name: View current database
+        run: ls -R
+        working-directory: output
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: "./output"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1

@@ -9,7 +9,7 @@ import {
   parseQuestionAndAnswersFromContent,
   parseSubQuestionsFromQuestion,
 } from "./parser.ts";
-import { throttle } from "./utils.ts";
+import { generateReport, throttle } from "./utils.ts";
 
 export const CRAWLERS = {
   RC: `https://gmatclub.com/forum/search.php?selected_search_tags%5B%5D=162&selected_search_tags%5B%5D=228&selected_search_tags%5B%5D=229&t=0&search_tags=exact&submit=Search`,
@@ -119,17 +119,5 @@ async function crawl() {
   }
 }
 
-const report = Object.keys(database).map((key) => ({
-  key,
-  count: database[key as keyof typeof database].length,
-}));
 await crawl();
-console.log(`# Crawling finished :rocket:
-
-New questions:
-${report
-  .map(
-    ({ key, count }) =>
-      `**${key}**: ${database[key as keyof typeof database].length - count}`
-  )
-  .join("\n")}`);
+generateReport();
