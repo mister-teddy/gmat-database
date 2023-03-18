@@ -39,15 +39,15 @@ jobs:
       - name: Download artifact
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
-        continue-on-error: true
         with:
           name: github-pages
           path: output
           workflow_conclusion: success
+          search_artifacts: true
+          check_artifacts: true
 
       - name: Extract pervious artifact
         run: tar --skip-old-files -xf artifact.tar && rm artifact.tar
-        continue-on-error: true
         working-directory: output
 
       - name: View current database

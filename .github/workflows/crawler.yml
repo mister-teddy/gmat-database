@@ -44,6 +44,7 @@ jobs:
           name: github-pages
           path: output
           workflow_conclusion: success
+          search_artifacts: true
 
       - name: Extract pervious artifact
         run: tar --skip-old-files -xf artifact.tar && rm artifact.tar
