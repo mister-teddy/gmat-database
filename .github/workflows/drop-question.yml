@@ -1,10 +1,23 @@
+# Drop a specific question based on its ID
+
+name: Drop Question
+
+concurrency: gmat-database
+
 on:
   workflow_dispatch:
     inputs:
       question_id:
-        description: "ID of the question to be removed from the database. The question might be crawln again in the future."
+        description: "ID of the question to be removed from the database"
         required: true
         type: string
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  deployments: write
+  id-token: write
 
 jobs:
   main:

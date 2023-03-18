@@ -46,7 +46,7 @@ async function crawlQuestion(
   console.warn(">>> Crawling question", url);
   const document = await fetchAsDOM(url);
   const contents = parseContentsFromDocument(document);
-  const [rawQuestion, ...explainations] = contents.slice(0, -1);
+  const [rawQuestion, ...explanations] = contents.slice(0, -1);
   if (type === "RC") {
     const { question, subQuestions: subQuestionContents } =
       parseSubQuestionsFromQuestion(rawQuestion);
@@ -58,7 +58,7 @@ async function crawlQuestion(
       type,
       question,
       subQuestions,
-      explainations,
+      explanations,
     };
   } else {
     const { question, answers } =
@@ -68,7 +68,7 @@ async function crawlQuestion(
       type,
       question,
       answers: type === "DS" ? DSAnswers : answers,
-      explainations,
+      explanations,
     };
   }
 }

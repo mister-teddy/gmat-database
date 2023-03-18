@@ -11,7 +11,7 @@ export interface Question {
   question: string;
   answers?: string[];
   subQuestions?: SubQuestion[];
-  explainations: string[];
+  explanations: string[];
 }
 
 export type Database = {
