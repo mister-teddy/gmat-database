@@ -1,8 +1,16 @@
 import { CRAWLERS } from "./main.ts";
 
+export interface SubQuestion {
+  question: string;
+  answers: string[];
+}
+
 export interface Question {
   src: string;
+  type: keyof typeof CRAWLERS;
   question: string;
+  answers?: string[];
+  subQuestions?: SubQuestion[];
   explainations: string[];
 }
 

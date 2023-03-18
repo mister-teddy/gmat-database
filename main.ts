@@ -3,6 +3,12 @@ import {
   Element,
 } from "https://deno.land/x/deno_dom@v0.1.35-alpha/deno-dom-wasm.ts";
 import { database, Question } from "./database.ts";
+import {
+  DSAnswers,
+  parseContentsFromDocument,
+  parseQuestionAndAnswersFromContent,
+  parseSubQuestionsFromQuestion,
+} from "./parser.ts";
 import { throttle } from "./utils.ts";
 
 export const CRAWLERS = {
@@ -33,48 +39,38 @@ async function fetchAsDOM(url: string) {
   return document!;
 }
 
-async function crawlQuestion(url: string): Promise<Question> {
+async function crawlQuestion(
+  url: string,
+  type: keyof typeof CRAWLERS
+): Promise<Question> {
   console.warn(">>> Crawling question", url);
   const document = await fetchAsDOM(url);
-  const contents = Array.from(document.querySelectorAll(".item.text")).map(
-    (question) => {
-      const questionElement = question as Element;
-      let tobeRemoved = false;
-      Array.from(questionElement.children).forEach((node) => {
-        if (node.classList.contains("twoRowsBlock")) {
-          tobeRemoved = true;
-          if (tobeRemoved) {
-            node._remove();
-          }
-        }
-      });
-      questionElement
-        .querySelectorAll(
-          "script, .quotetitle, .quotecontent, .twoRowsBlock, .post_signature"
-        )
-        .forEach((node) => {
-          node._remove();
-        });
-      questionElement.getElementsByTagName("b").forEach((node) => {
-        if (
-          node.innerText.startsWith("The OA will be automatically revealed on")
-        ) {
-          node.remove();
-        }
-      });
-      return questionElement.innerHTML
-        .replace(/<!--[\s\S]*?-->/g, "")
-        .replace(/<br>_________________<br>/g, "")
-        .trim()
-        .replace(/^( |<br>)*(.*?)( |<br>)*$/, "$2");
-    }
-  );
-  const [question, ...explainations] = contents.slice(0, -1);
-  return {
-    src: url,
-    question,
-    explainations,
-  };
+  const contents = parseContentsFromDocument(document);
+  const [rawQuestion, ...explainations] = contents.slice(0, -1);
+  if (type === "RC") {
+    const { question, subQuestions: subQuestionContents } =
+      parseSubQuestionsFromQuestion(rawQuestion);
+    const subQuestions = subQuestionContents.map((questionContent) =>
+      parseQuestionAndAnswersFromContent(questionContent)
+    );
+    return {
+      src: url,
+      type,
+      question,
+      subQuestions,
+      explainations,
+    };
+  } else {
+    const { question, answers } =
+      parseQuestionAndAnswersFromContent(rawQuestion);
+    return {
+      src: url,
+      type,
+      question,
+      answers: type === "DS" ? DSAnswers : answers,
+      explainations,
+    };
+  }
 }
 
 async function crawl() {
@@ -98,17 +94,24 @@ async function crawl() {
       const questionUrl = post.href!;
       const id = getIdFromUrl(questionUrl);
       if (!database[questionType].includes(id)) {
-        database[questionType].push(id);
-        await throttle();
-        const question = await crawlQuestion(questionUrl);
-        await Deno.writeTextFile(
-          `./output/${id}.json`,
-          JSON.stringify(question)
-        );
-        await Deno.writeTextFile(
-          "./output/index.json",
-          JSON.stringify(database)
-        );
+        try {
+          await throttle();
+          const question = await crawlQuestion(questionUrl, questionType);
+          database[questionType].push(id);
+          await Deno.writeTextFile(
+            `./output/${id}.json`,
+            JSON.stringify(question)
+          );
+          await Deno.writeTextFile(
+            "./output/index.json",
+            JSON.stringify(database)
+          );
+        } catch (error) {
+          console.warn(
+            `>>> Error while parsing question #${id}, skipping...`,
+            error
+          );
+        }
       } else {
         console.warn(`>>> Question #${id} already crawln, skipping...`);
       }
