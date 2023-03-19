@@ -10,7 +10,21 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  schedule:
+    - cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      action:
+        description: "Action to be executed"
+        required: true
+        default: "crawl"
+        type: choice
+        options:
+          - crawl
+          - drop-question
+      question_id:
+        description: "ID of the question to be removed from the database (if the action to be executed is drop-question)"
+        type: string
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -59,7 +73,14 @@ jobs:
         run: deno lint
 
       - name: Run main
+        if: inputs.action == 'crawl'
         run: deno run --allow-all ./main.ts >> $GITHUB_STEP_SUMMARY
+
+      - name: Run drop-question
+        if: inputs.action == 'drop-question'
+        run: deno run --allow-all ./drop-question.ts >> $GITHUB_STEP_SUMMARY
+        env:
+          QUESTION_ID: ${{ inputs.question_id }}
 
       # Must run in the same jobs otherwise previous output won't be kept
       - name: Setup Pages
