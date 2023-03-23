@@ -2,6 +2,7 @@
 # Fetch https://nguyenhongphat0.github.io/gmat-database/index.json or https://nguyenhongphat0.github.io/gmat-database/<question_id>.json to use it
 
 name: Crawler
+run-name: ${{ inputs.action == 'crawl' && 'Start crawling' || format('Drop question {0}', inputs.question_id) }} by @${{ github.actor }}
 
 concurrency: gmat-database
 
@@ -53,7 +54,7 @@ jobs:
       - name: Download artifact
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
-        continue-on-error: true
+        continue-on-error: ${{ inputs.action == 'crawl' }}
         with:
           name: github-pages
           path: output
@@ -62,7 +63,7 @@ jobs:
 
       - name: Extract pervious artifact
         run: tar --skip-old-files -xf artifact.tar && rm artifact.tar
-        continue-on-error: true
+        continue-on-error: ${{ inputs.action == 'crawl' }}
         working-directory: output
 
       - name: View current database
