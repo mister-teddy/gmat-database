@@ -2,7 +2,7 @@
 # Fetch https://nguyenhongphat0.github.io/gmat-database/index.json or https://nguyenhongphat0.github.io/gmat-database/<question_id>.json to use it
 
 name: Crawler
-run-name: ${{ inputs.action == 'crawl' && 'Start crawling' || format('Drop question {0}', inputs.question_id) }} by @${{ github.actor }}
+run-name: ${{ inputs.action && (inputs.action == 'crawl' && 'Start crawling' || format('Drop question {0}', inputs.question_id)) || 'Refresh artifact' }} by @${{ github.actor }}
 
 concurrency: gmat-database
 
