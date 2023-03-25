@@ -6,6 +6,7 @@ export interface SubQuestion {
 }
 
 export interface Question {
+  id: string;
   src: string;
   type: keyof typeof CRAWLERS;
   question: string;

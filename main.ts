@@ -44,6 +44,7 @@ async function crawlQuestion(
   type: keyof typeof CRAWLERS
 ): Promise<Question> {
   console.warn(">>> Crawling question", url);
+  const id = getIdFromUrl(url);
   const document = await fetchAsDOM(url);
   const contents = parseContentsFromDocument(document);
   const [rawQuestion, ...explanations] = contents.slice(0, -1);
@@ -54,6 +55,7 @@ async function crawlQuestion(
       parseQuestionAndAnswersFromContent(questionContent)
     );
     return {
+      id,
       src: url,
       type,
       question,
@@ -64,6 +66,7 @@ async function crawlQuestion(
     const { question, answers } =
       parseQuestionAndAnswersFromContent(rawQuestion);
     return {
+      id,
       src: url,
       type,
       question,

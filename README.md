@@ -21,7 +21,7 @@ fetch(`https://nguyenhongphat0.github.io/gmat-database/${questionId}.json`);
 ```
 
 To study:
-Install the Flutter application [Open GMAT Database](https://github.com/nguyenhongphat0/open_gmat_database).
+Install the Flutter application [GMAT Question Bank](https://github.com/nguyenhongphat0/gmat_question_bank).
 
 ### License
 
