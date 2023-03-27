@@ -2,7 +2,7 @@
 # Fetch https://nguyenhongphat0.github.io/gmat-database/index.json or https://nguyenhongphat0.github.io/gmat-database/<question_id>.json to use it
 
 name: Crawler
-run-name: ${{ inputs.action && (inputs.action == 'crawl' && '🚀 Start crawling' || format('🩸 Drop question {0}', inputs.question_id)) || '✨ Refresh artifact' }} by @${{ github.actor }}
+run-name: ${{ inputs.action && (inputs.action == 'crawl' && '🚀 Start crawling' || (inputs.action == 'edit-question' && format('📝 Edit question {0}', inputs.question_id) || format('🩸 Drop question {0}', inputs.question_id))) || '✨ Refresh artifact' }} by @${{ github.actor }}
 
 concurrency: gmat-database
 
@@ -22,9 +22,13 @@ on:
         type: choice
         options:
           - crawl
+          - edit-question
           - drop-question
       question_id:
-        description: "ID of the question to be removed from the database (if the action to be executed is drop-question)"
+        description: "ID of the question to be edit or removed from the database (if the action to be executed is crawl/refresh please ignore)"
+        type: string
+      question_content:
+        description: "The new content of the question (if the action to be executed is edit-question)"
         type: string
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
@@ -75,6 +79,13 @@ jobs:
       - name: Run main
         if: inputs.action == 'crawl'
         run: deno run --allow-all ./main.ts >> $GITHUB_STEP_SUMMARY
+
+      - name: Run edit-question
+        if: inputs.action == 'edit-question'
+        run: deno run --allow-all ./edit-question.ts >> $GITHUB_STEP_SUMMARY
+        env:
+          QUESTION_ID: ${{ inputs.question_id }}
+          QUESTION_CONTENT: ${{ inputs.question_content }}
 
       - name: Run drop-question
         if: inputs.action == 'drop-question'

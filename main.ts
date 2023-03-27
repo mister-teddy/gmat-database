@@ -4,10 +4,8 @@ import {
 } from "https://deno.land/x/deno_dom@v0.1.35-alpha/deno-dom-wasm.ts";
 import { database, Question } from "./database.ts";
 import {
-  DSAnswers,
   parseContentsFromDocument,
-  parseQuestionAndAnswersFromContent,
-  parseSubQuestionsFromQuestion,
+  parseQuestionFromRawContent,
 } from "./parser.ts";
 import { generateReport, throttle } from "./utils.ts";
 
@@ -48,32 +46,13 @@ async function crawlQuestion(
   const document = await fetchAsDOM(url);
   const contents = parseContentsFromDocument(document);
   const [rawQuestion, ...explanations] = contents.slice(0, -1);
-  if (type === "RC") {
-    const { question, subQuestions: subQuestionContents } =
-      parseSubQuestionsFromQuestion(rawQuestion);
-    const subQuestions = subQuestionContents.map((questionContent) =>
-      parseQuestionAndAnswersFromContent(questionContent)
-    );
-    return {
-      id,
-      src: url,
-      type,
-      question,
-      subQuestions,
-      explanations,
-    };
-  } else {
-    const { question, answers } =
-      parseQuestionAndAnswersFromContent(rawQuestion);
-    return {
-      id,
-      src: url,
-      type,
-      question,
-      answers: type === "DS" ? DSAnswers : answers,
-      explanations,
-    };
-  }
+  const question = parseQuestionFromRawContent(rawQuestion, type);
+  return {
+    id,
+    src: url,
+    explanations,
+    ...question,
+  };
 }
 
 async function crawl() {

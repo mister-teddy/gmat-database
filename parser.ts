@@ -3,6 +3,7 @@ import {
   HTMLDocument,
   Element,
 } from "https://deno.land/x/deno_dom@v0.1.35-alpha/deno-dom-wasm.ts";
+import { CRAWLERS } from "./main.ts";
 
 export function parseContentsFromDocument(document: HTMLDocument) {
   const contents = Array.from(document.querySelectorAll(".item.text")).map(
@@ -90,6 +91,32 @@ export function parseSubQuestionsFromQuestion(questionContent: string) {
     }
   });
   return { question, subQuestions };
+}
+
+export function parseQuestionFromRawContent(
+  rawContent: string,
+  type: keyof typeof CRAWLERS
+) {
+  if (type === "RC") {
+    const { question, subQuestions: subQuestionContents } =
+      parseSubQuestionsFromQuestion(rawContent);
+    const subQuestions = subQuestionContents.map((questionContent) =>
+      parseQuestionAndAnswersFromContent(questionContent)
+    );
+    return {
+      type,
+      question,
+      subQuestions,
+    };
+  } else {
+    const { question, answers } =
+      parseQuestionAndAnswersFromContent(rawContent);
+    return {
+      type,
+      question,
+      answers: type === "DS" ? DSAnswers : answers,
+    };
+  }
 }
 
 export const DSAnswers = [
