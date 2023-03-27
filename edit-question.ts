@@ -18,6 +18,9 @@ async function editQuestion(questionId?: string, content?: string) {
           `./output/${questionId}.json`,
           JSON.stringify(question)
         );
+        console.info(
+          `New question content: https://nguyenhongphat0.github.io/gmat-database/${questionId}.json`
+        );
       }
     }
   }

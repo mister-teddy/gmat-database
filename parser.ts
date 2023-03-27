@@ -5,6 +5,15 @@ import {
 } from "https://deno.land/x/deno_dom@v0.1.35-alpha/deno-dom-wasm.ts";
 import { CRAWLERS } from "./main.ts";
 
+export function trimHtml(html: string) {
+  return html
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<br>_________________<br>/g, "")
+    .replace(/(<br>\s*){2,}/g, "<br>")
+    .trim()
+    .replace(/^( |<br>)*(.*?)( |<br>)*$/, "$2");
+}
+
 export function parseContentsFromDocument(document: HTMLDocument) {
   const contents = Array.from(document.querySelectorAll(".item.text")).map(
     (question) => {
@@ -32,11 +41,7 @@ export function parseContentsFromDocument(document: HTMLDocument) {
           node.remove();
         }
       });
-      return questionElement.innerHTML
-        .replace(/<!--[\s\S]*?-->/g, "")
-        .replace(/<br>_________________<br>/g, "")
-        .trim()
-        .replace(/^( |<br>)*(.*?)( |<br>)*$/, "$2");
+      return trimHtml(questionElement.innerHTML);
     }
   );
   return contents;
@@ -97,9 +102,10 @@ export function parseQuestionFromRawContent(
   rawContent: string,
   type: keyof typeof CRAWLERS
 ) {
+  const content = trimHtml(rawContent);
   if (type === "RC") {
     const { question, subQuestions: subQuestionContents } =
-      parseSubQuestionsFromQuestion(rawContent);
+      parseSubQuestionsFromQuestion(content);
     const subQuestions = subQuestionContents.map((questionContent) =>
       parseQuestionAndAnswersFromContent(questionContent)
     );
@@ -109,8 +115,7 @@ export function parseQuestionFromRawContent(
       subQuestions,
     };
   } else {
-    const { question, answers } =
-      parseQuestionAndAnswersFromContent(rawContent);
+    const { question, answers } = parseQuestionAndAnswersFromContent(content);
     return {
       type,
       question,
