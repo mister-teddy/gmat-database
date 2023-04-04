@@ -57,12 +57,11 @@ jobs:
 
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v2.1.1
         continue-on-error: ${{ inputs.action == 'crawl' }}
         with:
           name: github-pages
           path: output
-          workflow_conclusion: success
 
       - name: Extract pervious artifact
         run: tar --skip-old-files -xf artifact.tar && rm artifact.tar
