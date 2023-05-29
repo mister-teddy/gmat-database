@@ -1,5 +1,5 @@
 # Crawl questions on GMAT Club and publish it to Github Pages as JSONs
-# Fetch https://nguyenhongphat0.github.io/gmat-database/index.json or https://nguyenhongphat0.github.io/gmat-database/<question_id>.json to use it
+# Fetch https://teddyfullstack.github.io/gmat-database/index.json or https://teddyfullstack.github.io/gmat-database/<question_id>.json to use it
 
 name: Crawler
 run-name: ${{ inputs.action && (inputs.action == 'crawl' && '🚀 Start crawling' || (inputs.action == 'edit-question' && format('📝 Edit question {0}', inputs.question_id) || format('🩸 Drop question {0}', inputs.question_id))) || '✨ Refresh artifact' }}
@@ -58,9 +58,20 @@ jobs:
       - name: Download artifact
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
-        continue-on-error: ${{ inputs.action == 'crawl' }}
+        continue-on-error: true
         with:
           name: github-pages
+          path: output
+          workflow_conclusion: success
+
+      - name: Download backup artifact
+        id: download-backup-artifact
+        if: ${{ steps.download-artifact.outcome == 'failure' }}
+        uses: dawidd6/action-download-artifact@v2
+        continue-on-error: ${{ inputs.action == 'crawl' }}
+        with:
+          name: output-.*
+          name_is_regexp: true
           path: output
           workflow_conclusion: success
 
@@ -104,7 +115,7 @@ jobs:
         uses: actions/upload-artifact@v3.1.2
         with:
           name: output-${{ github.run_id }}
-          path: "./output"
+          path: "./output/*"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
