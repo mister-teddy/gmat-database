@@ -64,6 +64,12 @@ jobs:
           path: output
           workflow_conclusion: success
 
+      - name: Extract pervious artifact
+        if: ${{ steps.download-artifact.outcome == 'success' }}
+        run: tar --skip-old-files -xf artifact.tar && rm artifact.tar
+        continue-on-error: ${{ inputs.action == 'crawl' }}
+        working-directory: output
+
       - name: Download backup artifact
         id: download-backup-artifact
         if: ${{ steps.download-artifact.outcome == 'failure' }}
@@ -72,13 +78,13 @@ jobs:
         with:
           name: output-.*
           name_is_regexp: true
-          path: output
+          path: output.bak
           workflow_conclusion: success
 
-      - name: Extract pervious artifact
-        run: tar --skip-old-files -xf artifact.tar && rm artifact.tar
-        continue-on-error: ${{ inputs.action == 'crawl' }}
-        working-directory: output
+      - name: Rename artifact
+        if: ${{ steps.download-backup-artifact.outcome == 'success' }}
+        run: rm -rf ../output && mv "$(ls -d */)" ../output
+        working-directory: output.bak
 
       - name: View current database
         run: ls -R
