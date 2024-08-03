@@ -19,7 +19,7 @@ async function editQuestion(questionId?: string, content?: string) {
           JSON.stringify(question)
         );
         console.info(
-          `New question content: https://teddyfullstack.github.io/gmat-database/${questionId}.json`
+          `New question content: https://teddyos.github.io/gmat-database/${questionId}.json`
         );
       }
     }

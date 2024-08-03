@@ -16,12 +16,12 @@ Here's how it works under the hood:
 To consume the data:
 
 ```ts
-fetch(`https://teddyfullstack.github.io/gmat-database/index.json`);
-fetch(`https://teddyfullstack.github.io/gmat-database/${questionId}.json`);
+fetch(`https://teddyos.github.io/gmat-database/index.json`);
+fetch(`https://teddyos.github.io/gmat-database/${questionId}.json`);
 ```
 
 To study:
-Install the Flutter application [GMAT Question Bank](https://github.com/teddyfullstack/gmat_question_bank).
+Install the Flutter application [GMAT Question Bank](https://github.com/teddyos/gmat_question_bank).
 
 ### License
 
