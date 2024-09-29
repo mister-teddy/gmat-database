@@ -1,5 +1,5 @@
 # Crawl questions on GMAT Club and publish it to Github Pages as JSONs
-# Fetch https://teddyos.github.io/gmat-database/index.json or https://teddyos.github.io/gmat-database/<question_id>.json to use it
+# Fetch https://mister-teddy.github.io/gmat-database/index.json or https://mister-teddy.github.io/gmat-database/<question_id>.json to use it
 
 name: Crawler
 run-name: ${{ inputs.action && (inputs.action == 'crawl' && '🚀 Start crawling' || (inputs.action == 'edit-question' && format('📝 Edit question {0}', inputs.question_id) || format('🩸 Drop question {0}', inputs.question_id))) || '✨ Refresh artifact' }}
